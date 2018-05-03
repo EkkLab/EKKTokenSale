@@ -20,28 +20,28 @@ contract token {
 contract EKKcrowdsale is Ownable{
 
     using SafeMath for uint256;
-    
+
     // start and end timestamps where investments are allowed (both inclusive)
     uint256 public startTime;
     uint public ICOperiod = 14 days;
-    
+
     // softcap
     uint256 softcap = 2000 ether;
-    
+
     // address where funds are collected
     address public wallet;
- 
+
     //minimum investment
     uint256 minimumInvestment = 100 finney;
-    
+
     // how many token units a buyer gets per wei
     uint public price = 10000;
- 
+
     // amount of raised money in wei
     uint256 public weiRaised;
     bool public isFinalized = false;
     bool issoftcapreached = false;
-    
+
     address public creator; //Address of the contract deployer
     EKK public token;
     RefundVault public vault;
@@ -57,55 +57,55 @@ contract EKKcrowdsale is Ownable{
         token = EKK(_tokenaddress);
         vault = new RefundVault(wallet);
     }
-  //set ICOstarttime 
-  
+  //set ICOstarttime
+
   function setStarttime (uint256 _starttime) onlyOwner public  {
       startTime = _starttime;
   }
 
-  //set ICOendtime 
-  
+  //set ICOendtime
+
   function setICOperiod (uint256 _ICOperiod) onlyOwner public  {
       ICOperiod = _ICOperiod;
   }
-  
-  //set wallet address 
+
+  //set wallet address
   function setWalletAddress (address _wallet) onlyOwner public {
       wallet = _wallet;
   }
-  
+
   // fallback function can be used to buy tokens
   function () external payable {
      buyTokens(msg.sender);
   }
- 
+
   // low level token purchase function
   function buyTokens(address beneficiary) public payable {
-    
+
     uint256 weiAmount = msg.value;
     uint256 tokens = getTokenAmount(weiAmount);
-    
+
     require(beneficiary != address(0));
     require(validPurchase());
     require(tokens <= token.GetPublicAllocation());
-    
+
     token.transferfromThis(beneficiary, tokens);
     weiRaised = weiRaised.add(msg.value);
-    TokenPurchase(beneficiary, tokens);
-    
+    emit TokenPurchase(beneficiary, tokens);
+
     if(weiRaised >= softcap && !issoftcapreached) {
         issoftcapreached = true;
         vault.close();
     }
-    
+
     if(issoftcapreached) {
         wallet.transfer(msg.value);
     } else {
         forwardFunds();
     }
   }
- 
- 
+
+
   /**
    * @dev Must be called after crowdsale ends, to do some extra finalization
    * work. Calls the contract's finalization function.
@@ -113,26 +113,26 @@ contract EKKcrowdsale is Ownable{
   function finalize() onlyOwner public {
     require(!isFinalized);
     require(hasEnded());
-    
+
     if (!issoftcapreached) {
       vault.enableRefunds();
     }
-    
+
     token.TransferToGrowthReserve();  //unsold tokens will be allocated back to Platrform growth reserve
-    Finalized();
+    emit Finalized();
     isFinalized = true;
   }
-  
+
   // if crowdsale is unsuccessful, investors can claim refunds here
   function claimRefund() public {
     require(isFinalized);
     require(!softcapReached());
- 
+
     vault.refund(msg.sender);
   }
-  
- 
-  
+
+
+
   function softcapReached() public view returns (bool) {
     return weiRaised >= softcap;
   }
@@ -141,12 +141,12 @@ contract EKKcrowdsale is Ownable{
   function hasEnded() public view returns (bool) {
     return now > startTime + ICOperiod;
   }
- 
+
   // Override this method to have a way to add business logic to your crowdsale when buying
   function getTokenAmount(uint256 weiAmount) internal view returns(uint256) {
-      
+
     uint256 tokenBought = weiAmount.mul(price);
-    
+
     if (now < startTime + 2 days ) {
       tokenBought = tokenBought.mul(120);
       tokenBought = tokenBought.div(100); //+20%
@@ -162,17 +162,17 @@ contract EKKcrowdsale is Ownable{
 
     return tokenBought;
   }
- 
+
   function forwardFunds() internal {
     vault.deposit.value(msg.value)(msg.sender);
   }
-  
+
   // @return true if the transaction can buy tokens
   function validPurchase() internal view returns (bool) {
     bool withinPeriod = now >= startTime && now <= startTime + ICOperiod;
-    bool validinput = msg.value >= minimumInvestment; 
+    bool validinput = msg.value >= minimumInvestment;
     return withinPeriod && validinput;
   }
-  
+
 
 }

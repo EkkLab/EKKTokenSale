@@ -56,7 +56,7 @@ contract admined { //This token contract is administered
     modifier transferLock() { //A modifier to lock transactions
         require(lockTransfer == false || allowedAddress == msg.sender);
         _;
-    }                                                    
+    }
 
    /**
     * @dev Function to set new admin address
@@ -201,7 +201,7 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
 * @dev Initial supply creation
 */
 contract EKK is ERC20Token {
-    
+
     string public name = 'EKK Token';
     uint8 public decimals = 18;
     string public symbol = 'EKK';
@@ -209,12 +209,12 @@ contract EKK is ERC20Token {
     uint256 public totalSupply = 2000000000 * 10**uint256(decimals);      //initial token creation
     uint256 public publicAllocation = 1000000000 * 10 ** uint(decimals);  // 50%  Token sales & Distribution
     uint256 public GrowthReserve = 700000000 * 10 ** uint(decimals);      // 35%  Platform Growth Reserve
-    uint256 public MarketingPromotion= 100000000 * 10 ** uint(decimals);  // 5%   Markting/Promotion 
+    uint256 public MarketingPromotion= 100000000 * 10 ** uint(decimals);  // 5%   Markting/Promotion
     uint256 public TeamAllocation = 160000000 *10 ** uint(decimals);      // 8%   Team
-    uint256 public Advisors = 40000000 * 10 ** uint(decimals);            // 2%   Advisors 
+    uint256 public Advisors = 40000000 * 10 ** uint(decimals);            // 2%   Advisors
 
     function EKK() public {
-        
+
         balances[this] = totalSupply;
         setTransferLock(true);
         setSupplyLock(true);
@@ -222,14 +222,14 @@ contract EKK is ERC20Token {
         emit Transfer(0, this, totalSupply);
         emit Transfer(this, msg.sender, balances[msg.sender]);
     }
-    
+
     /**
     *@dev Function to handle callback calls
     */
     function() public {
         revert();
-    }  
-    
+    }
+
     /**
     * @dev Get publicAllocation
     */
@@ -253,38 +253,38 @@ contract EKK is ERC20Token {
         publicAllocation = publicAllocation.sub(_value);
         // Add the same to the recipient
         balances[_to] = balances[_to].add(_value);
-        Transfer(this, _to, _value);
+        emit Transfer(this, _to, _value);
         // Asserts are used to use static analysis to find bugs in your code. They should never fail
         assert(balances[this] + balances[_to] == previousBalances);
         return true;
     }
-    
+
     function sendGrowthReserve(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
         require(to != 0x0 && GrowthReserve >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
         GrowthReserve = GrowthReserve.sub(value);
-        Transfer(this, to, value);
+        emit Transfer(this, to, value);
     }
-    
+
     function sendMarketingPromotion(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
         require(to != 0x0 && MarketingPromotion >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
         MarketingPromotion = MarketingPromotion.sub(value);
-        Transfer(this, to, value);
+        emit Transfer(this, to, value);
     }
-    
+
     function sendTeamAllocation(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
         require(to != 0x0 && TeamAllocation >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
         TeamAllocation = TeamAllocation.sub(value);
-        Transfer(this, to, value);
-    } 
+        emit Transfer(this, to, value);
+    }
 
     function sendAdvisors(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
@@ -292,9 +292,9 @@ contract EKK is ERC20Token {
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
         Advisors = Advisors.sub(value);
-        Transfer(this, to, value);
-    }      
-    
+        emit Transfer(this, to, value);
+    }
+
     // unsold tokens back to Platform Growth Reserve
     function TransferToGrowthReserve() transferLock public  {
         GrowthReserve = GrowthReserve.add(publicAllocation);
