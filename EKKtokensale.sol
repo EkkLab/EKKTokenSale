@@ -146,9 +146,7 @@ contract EKKcrowdsale is Ownable{
   function getTokenAmount(uint256 weiAmount) internal view returns(uint256) {
 
     uint256 tokenBought = weiAmount.mul(price);
-<<<<<<< HEAD
-    
-    if(weiAmount >= 200) {
+    if(weiAmount >= 200 ether) {
       if (now < startTime + 2 days ) {
         tokenBought = tokenBought.mul(120);
         tokenBought = tokenBought.div(100); //+20%
@@ -174,23 +172,7 @@ contract EKKcrowdsale is Ownable{
         tokenBought = tokenBought.mul(110);
         tokenBought = tokenBought.div(100); //+5%
       }
-=======
-
-    if (now < startTime + 2 days ) {
-      tokenBought = tokenBought.mul(120);
-      tokenBought = tokenBought.div(100); //+20%
     }
-    else if ( (now > startTime + 2 days) && (now < startTime + 7 days)) {
-      tokenBought = tokenBought.mul(115);
-      tokenBought = tokenBought.div(100); //+20%
-    }
-    else if ((now > startTime + 7 days) && (now < startTime + 14 days)) {
-      tokenBought = tokenBought.mul(110);
-      tokenBought = tokenBought.div(100); //+10%
->>>>>>> 482809bbabff99e8d055d466c530107b945de2a4
-    }
-
-
     return tokenBought;
   }
 
