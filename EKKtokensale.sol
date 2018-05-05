@@ -147,18 +147,34 @@ contract EKKcrowdsale is Ownable{
       
     uint256 tokenBought = weiAmount.mul(price);
     
-    if (now < startTime + 2 days ) {
-      tokenBought = tokenBought.mul(120);
-      tokenBought = tokenBought.div(100); //+20%
+    if(weiAmount >= 200) {
+      if (now < startTime + 2 days ) {
+        tokenBought = tokenBought.mul(120);
+        tokenBought = tokenBought.div(100); //+20%
+      }
+      else if ( (now > startTime + 2 days) && (now < startTime + 7 days)) {
+        tokenBought = tokenBought.mul(115);
+        tokenBought = tokenBought.div(100); //+15%
+      }
+      else if ((now > startTime + 7 days) && (now < startTime + 14 days)) {
+        tokenBought = tokenBought.mul(110);
+        tokenBought = tokenBought.div(100); //+10%
+      }
+    } else {
+      if (now < startTime + 2 days ) {
+        tokenBought = tokenBought.mul(120);
+        tokenBought = tokenBought.div(100); //+15%
+      }
+      else if ( (now > startTime + 2 days) && (now < startTime + 7 days)) {
+        tokenBought = tokenBought.mul(115);
+        tokenBought = tokenBought.div(100); //+10%
+      }
+      else if ((now > startTime + 7 days) && (now < startTime + 14 days)) {
+        tokenBought = tokenBought.mul(110);
+        tokenBought = tokenBought.div(100); //+5%
+      }
     }
-    else if ( (now > startTime + 2 days) && (now < startTime + 7 days)) {
-      tokenBought = tokenBought.mul(115);
-      tokenBought = tokenBought.div(100); //+20%
-    }
-    else if ((now > startTime + 7 days) && (now < startTime + 14 days)) {
-      tokenBought = tokenBought.mul(110);
-      tokenBought = tokenBought.div(100); //+10%
-    }
+
 
     return tokenBought;
   }
