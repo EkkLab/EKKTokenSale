@@ -161,15 +161,15 @@ contract EKKcrowdsale is Ownable{
       }
     } else {
       if (now < startTime + 2 days ) {
-        tokenBought = tokenBought.mul(120);
+        tokenBought = tokenBought.mul(115);
         tokenBought = tokenBought.div(100); //+15%
       }
       else if ( (now > startTime + 2 days) && (now < startTime + 7 days)) {
-        tokenBought = tokenBought.mul(115);
+        tokenBought = tokenBought.mul(110);
         tokenBought = tokenBought.div(100); //+10%
       }
       else if ((now > startTime + 7 days) && (now < startTime + 14 days)) {
-        tokenBought = tokenBought.mul(110);
+        tokenBought = tokenBought.mul(105);
         tokenBought = tokenBought.div(100); //+5%
       }
     }
