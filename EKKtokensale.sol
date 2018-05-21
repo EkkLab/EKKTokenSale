@@ -127,7 +127,7 @@ contract EKKcrowdsale is Ownable{
   function claimRefund() public {
     require(isFinalized);
     require(!softcapReached());
-
+    token.Refundtokens(msg.sender);
     vault.refund(msg.sender);
   }
 
