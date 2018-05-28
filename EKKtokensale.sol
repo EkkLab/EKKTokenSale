@@ -122,10 +122,7 @@ contract EKKcrowdsale is Ownable{
     emit Finalized();
     isFinalized = true;
   }
-  function Refundtokens(address _sender) internal {
-        GrowthReserve = GrowthReserve.add(balances[_sender]);
-        balances[_sender] = 0;
-    }
+  
 
   // if crowdsale is unsuccessful, investors can claim refunds here
   function claimRefund() public {
