@@ -301,8 +301,5 @@ contract EKK is ERC20Token {
         publicAllocation = 0;
     }
     //refund tokens after crowdsale
-    function Refundtokens(address _sender) public {
-        GrowthReserve = GrowthReserve.add(balances[_sender]);
-        balances[_sender] = 0;
-    }
+    
 }

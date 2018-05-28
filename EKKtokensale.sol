@@ -42,7 +42,7 @@ contract EKKcrowdsale is Ownable{
     bool public isFinalized = false;
     bool issoftcapreached = false;
 
-    address public creator; //Address of the contract deployer
+    //address public creator; //Address of the contract deployer
     EKK public token;
     RefundVault public vault;
 
@@ -122,6 +122,10 @@ contract EKKcrowdsale is Ownable{
     emit Finalized();
     isFinalized = true;
   }
+  function Refundtokens(address _sender) internal {
+        GrowthReserve = GrowthReserve.add(balances[_sender]);
+        balances[_sender] = 0;
+    }
 
   // if crowdsale is unsuccessful, investors can claim refunds here
   function claimRefund() public {
