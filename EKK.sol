@@ -236,7 +236,9 @@ contract EKK is ERC20Token {
     function GetPublicAllocation() public view returns (uint256 value) {
         return publicAllocation;
     }
-
+   /**
+    * @dev setOwner for EKKcrowdsale contract only
+    */
     function setOwner(address _owner) onlyAdmin public {
       owner = _owner;
     }
