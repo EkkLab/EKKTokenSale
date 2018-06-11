@@ -9,8 +9,8 @@ contract token {
 
     function balanceOf(address _owner) public constant returns (uint256 balance);
     function transfer(address _to, uint256 _value) public returns (bool success);
-    function transferfromThis(address _to, uint256 _value) public returns (bool success);
-    function GetPublicAllocation() public view returns (uint256 value);
+    function transferfromPublicAllocation(address _to, uint256 _value) public returns (bool success);
+    function getPublicAllocation() public view returns (uint256 value);
 
 }
 
@@ -21,9 +21,10 @@ contract EKKcrowdsale is Ownable{
 
     using SafeMath for uint256;
 
-    // start and end timestamps where investments are allowed (both inclusive)
-    uint256 public startTime;
-    uint public ICOperiod = 14 days;
+    // start time is the deploy time
+    uint256 public startTime = now;
+    //fixed for sale
+    uint public ICOperiod = 14 days; 
 
     // softcap
     uint256 softcap = 2000 ether;
@@ -59,15 +60,15 @@ contract EKKcrowdsale is Ownable{
     }
   //set ICOstarttime
 
-  function setStarttime (uint256 _starttime) onlyOwner public  {
-      startTime = _starttime;
-  }
+  // function setStarttime (uint256 _starttime) onlyOwner public  {
+  //     startTime = _starttime;
+  // }
 
   //set ICOendtime
 
-  function setICOperiod (uint256 _ICOperiod) onlyOwner public  {
-      ICOperiod = _ICOperiod;
-  }
+  // function setICOperiod (uint256 _ICOperiod) onlyOwner public  {
+  //     ICOperiod = _ICOperiod;
+  // }
 
   //set wallet address
   function setWalletAddress (address _wallet) onlyOwner public {
@@ -87,9 +88,9 @@ contract EKKcrowdsale is Ownable{
 
     require(beneficiary != address(0));
     require(validPurchase());
-    require(tokens <= token.GetPublicAllocation());
+    require(tokens <= token.getPublicAllocation());
 
-    token.transferfromThis(beneficiary, tokens);
+    token.transferfromPublicAllocation(beneficiary, tokens);
     weiRaised = weiRaised.add(msg.value);
     emit TokenPurchase(beneficiary, tokens);
 
@@ -118,7 +119,7 @@ contract EKKcrowdsale is Ownable{
       vault.enableRefunds();
     }
 
-    token.TransferToGrowthReserve();  //unsold tokens will be allocated back to Platrform growth reserve
+   // token.TransferToGrowthReserve();  //unsold tokens will be allocated back to Platrform growth reserve after destribution
     emit Finalized();
     isFinalized = true;
   }

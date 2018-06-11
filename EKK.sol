@@ -182,7 +182,7 @@ contract EKK is ERC20Token {
     /**
     * @dev Get publicAllocation
     */
-    function GetPublicAllocation() public view returns (uint256 value) {
+    function getPublicAllocation() public view returns (uint256 value) {
         return publicAllocation;
     }
    /**
@@ -194,7 +194,7 @@ contract EKK is ERC20Token {
       /**
  *  transfer, only can be called by crowdsale contract
  */
-    function transferfromThis(address _to, uint256 _value) crowdsaleonly public returns (bool success) {
+    function transferfromPublicAllocation(address _to, uint256 _value) crowdsaleonly public returns (bool success) {
         // Prevent transfer to 0x0 address. Use burn() instead
         require(_to != 0x0);
         // Check if the sender has enough
@@ -214,7 +214,7 @@ contract EKK is ERC20Token {
         return true;
     }
 
-    function sendGrowthReserve(address to, uint256 _value) onlyAdmin public  {
+    function growthReserveTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
         require(to != 0x0 && GrowthReserve >= value);
         balances[this] = balances[this].sub(value);
@@ -223,7 +223,7 @@ contract EKK is ERC20Token {
         Transfer(this, to, value);
     }
 
-    function sendMarketingPromotion(address to, uint256 _value) onlyAdmin public  {
+    function marketingPromotionTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
         require(to != 0x0 && MarketingPromotion >= value);
         balances[this] = balances[this].sub(value);
@@ -232,7 +232,7 @@ contract EKK is ERC20Token {
         Transfer(this, to, value);
     }
 
-    function sendTeamAllocation(address to, uint256 _value) onlyAdmin public  {
+    function teamAllocationTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
         require(to != 0x0 && TeamAllocation >= value);
         balances[this] = balances[this].sub(value);
@@ -241,7 +241,7 @@ contract EKK is ERC20Token {
         Transfer(this, to, value);
     }
 
-    function sendAdvisors(address to, uint256 _value) onlyAdmin public  {
+    function advisorsTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
         require(to != 0x0 && Advisors >= value);
         balances[this] = balances[this].sub(value);
@@ -256,12 +256,7 @@ contract EKK is ERC20Token {
         publicAllocation = 0;
     }
     //refund tokens after crowdsale
-<<<<<<< HEAD
-    function Refundtokens(address _sender) public {
-        require(msg.sender==owner);
-=======
     function Refundtokens(address _sender) crowdsaleonly public {
->>>>>>> upstream/master
         GrowthReserve = GrowthReserve.add(balances[_sender]);
         balances[_sender] = 0;
     }
