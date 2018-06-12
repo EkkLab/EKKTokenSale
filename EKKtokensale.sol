@@ -9,7 +9,7 @@ contract token {
 
     function balanceOf(address _owner) public constant returns (uint256 balance);
     function transfer(address _to, uint256 _value) public returns (bool success);
-    function transferfromPublicAllocation(address _to, uint256 _value) public returns (bool success);
+    function transferFromPublicAllocation(address _to, uint256 _value) public returns (bool success);
     function getPublicAllocation() public view returns (uint256 value);
 
 }
@@ -24,7 +24,7 @@ contract EKKcrowdsale is Ownable{
     // start time is the deploy time
     uint256 public startTime = now;
     //fixed for sale
-    uint public ICOperiod = 14 days; 
+    uint public icoPeriod = 14 days; 
 
     // softcap
     uint256 softcap = 2000 ether;
@@ -41,7 +41,7 @@ contract EKKcrowdsale is Ownable{
     // amount of raised money in wei
     uint256 public weiRaised;
     bool public isFinalized = false;
-    bool issoftcapreached = false;
+    bool isSoftcapreached = false;
 
     //address public creator; //Address of the contract deployer
     EKK public token;
@@ -90,16 +90,16 @@ contract EKKcrowdsale is Ownable{
     require(validPurchase());
     require(tokens <= token.getPublicAllocation());
 
-    token.transferfromPublicAllocation(beneficiary, tokens);
+    token.transferFromPublicAllocation(beneficiary, tokens);
     weiRaised = weiRaised.add(msg.value);
     emit TokenPurchase(beneficiary, tokens);
 
-    if(weiRaised >= softcap && !issoftcapreached) {
-        issoftcapreached = true;
+    if(weiRaised >= softcap && !isSoftcapreached) {
+        isSoftcapreached = true;
         vault.close();
     }
 
-    if(issoftcapreached) {
+    if(isSoftcapreached) {
         wallet.transfer(msg.value);
     } else {
         forwardFunds();
@@ -115,7 +115,7 @@ contract EKKcrowdsale is Ownable{
     require(!isFinalized);
     require(hasEnded());
 
-    if (!issoftcapreached) {
+    if (!isSoftcapreached) {
       vault.enableRefunds();
     }
 
@@ -129,7 +129,7 @@ contract EKKcrowdsale is Ownable{
   function claimRefund() public {
     require(isFinalized);
     require(!softcapReached());
-    token.Refundtokens(msg.sender);
+    token.refundTokens(msg.sender);
     vault.refund(msg.sender);
   }
 
@@ -141,7 +141,7 @@ contract EKKcrowdsale is Ownable{
 
   // @return true if crowdsale event has ended
   function hasEnded() public view returns (bool) {
-    return now > startTime + ICOperiod;
+    return now > startTime + icoPeriod;
   }
 
   // Override this method to have a way to add business logic to your crowdsale when buying
@@ -184,7 +184,7 @@ contract EKKcrowdsale is Ownable{
 
   // @return true if the transaction can buy tokens
   function validPurchase() internal view returns (bool) {
-    bool withinPeriod = now >= startTime && now <= startTime + ICOperiod;
+    bool withinPeriod = now >= startTime && now <= startTime + icoPeriod;
     bool validinput = msg.value >= minimumInvestment;
     return withinPeriod && validinput;
   }
