@@ -159,11 +159,11 @@ contract EKK is ERC20Token {
     string public version = '1';
     uint256 public totalSupply = 2000000000 * 10**uint256(decimals);      //initial token creation
     uint256 public publicAllocation = 1000000000 * 10 ** uint(decimals);  // 50%  Token sales & Distribution
-    uint256 public GrowthReserve = 700000000 * 10 ** uint(decimals);      // 35%  Platform Growth Reserve
-    uint256 public MarketingPromotion= 100000000 * 10 ** uint(decimals);  // 5%   Markting/Promotion
-    uint256 public TeamAllocation = 160000000 *10 ** uint(decimals);      // 8%   Team
-    uint256 public Advisors = 40000000 * 10 ** uint(decimals);            // 2%   Advisors
-
+    uint256 public growthReserve = 700000000 * 10 ** uint(decimals);      // 35%  Platform Growth Reserve
+    uint256 public marketingAllocation= 100000000 * 10 ** uint(decimals);  // 5%   Markting/Promotion
+    uint256 public teamAllocation = 160000000 *10 ** uint(decimals);      // 8%   Team
+    uint256 public advisorsAllocation = 40000000 * 10 ** uint(decimals);            // 2%   Advisors
+    address public owner;
     function EKK() public {
 
         balances[this] = totalSupply;
@@ -182,13 +182,19 @@ contract EKK is ERC20Token {
     /**
     * @dev Get publicAllocation
     */
-    function GetPublicAllocation() public view returns (uint256 value) {
+    function getPublicAllocation() public view returns (uint256 value) {
         return publicAllocation;
+    }
+   /**
+    * @dev setOwner for EKKcrowdsale contract only
+    */
+    function setOwner(address _owner) onlyAdmin public {
+      owner = _owner;
     }
       /**
  *  transfer, only can be called by crowdsale contract
  */
-    function transferfromThis(address _to, uint256 _value) crowdsaleonly public returns (bool success) {
+    function transferFromPublicAllocation(address _to, uint256 _value) crowdsaleonly public returns (bool success) {
         // Prevent transfer to 0x0 address. Use burn() instead
         require(_to != 0x0);
         // Check if the sender has enough
@@ -208,50 +214,51 @@ contract EKK is ERC20Token {
         return true;
     }
 
-    function sendGrowthReserve(address to, uint256 _value) onlyAdmin public  {
+    function growthReserveTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
-        require(to != 0x0 && GrowthReserve >= value);
+        require(to != 0x0 && growthReserve >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
-        GrowthReserve = GrowthReserve.sub(value);
+        growthReserve = growthReserve.sub(value);
         Transfer(this, to, value);
     }
 
-    function sendMarketingPromotion(address to, uint256 _value) onlyAdmin public  {
+    function marketingAllocationTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
-        require(to != 0x0 && MarketingPromotion >= value);
+        require(to != 0x0 && marketingAllocation >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
-        MarketingPromotion = MarketingPromotion.sub(value);
+        marketingAllocation = marketingAllocation.sub(value);
         Transfer(this, to, value);
     }
 
-    function sendTeamAllocation(address to, uint256 _value) onlyAdmin public  {
+    function teamAllocationTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
-        require(to != 0x0 && TeamAllocation >= value);
+        require(to != 0x0 && teamAllocation >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
-        TeamAllocation = TeamAllocation.sub(value);
+        teamAllocation = teamAllocation.sub(value);
         Transfer(this, to, value);
     }
 
-    function sendAdvisors(address to, uint256 _value) onlyAdmin public  {
+    function advisorsAllocationTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
-        require(to != 0x0 && Advisors >= value);
+        require(to != 0x0 && advisorsAllocation >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
-        Advisors = Advisors.sub(value);
+        advisorsAllocation = advisorsAllocation.sub(value);
         Transfer(this, to, value);
     }
 
     // unsold tokens back to Platform Growth Reserve
-    function TransferToGrowthReserve() crowdsaleonly public  {
-        GrowthReserve = GrowthReserve.add(publicAllocation);
+    function transferToGrowthReserve() crowdsaleonly public  {
+        growthReserve = growthReserve.add(publicAllocation);
         publicAllocation = 0;
     }
     //refund tokens after crowdsale
-    function Refundtokens(address _sender) crowdsaleonly public {
-        GrowthReserve = GrowthReserve.add(balances[_sender]);
-        balances[_sender] = 0;
+    function refundTokens(address _sender) crowdsaleonly public {
+        growthReserve = growthReserve.add(balances[_sender]);
+        //balances[_sender] = 0;
     }
+    
 }
