@@ -21,8 +21,6 @@ contract ERC20TokenInterface {
 */
 contract admined { //This token contract is administered
     address public admin; //Admin address is public
-    bool public lockSupply; //Mint and Burn Lock flag
-    bool public lockTransfer; //Transfer Lock flag
     address public allowedAddress; //an address that can override lock condition
 
     /**
@@ -31,7 +29,7 @@ contract admined { //This token contract is administered
     */
     function admined() internal {
         admin = msg.sender; //Set initial admin to contract creator
-        emit Admined(admin);
+        Admined(admin);
     }
 
    /**
@@ -40,7 +38,7 @@ contract admined { //This token contract is administered
     */
     function setAllowedAddress(address _to) onlyAdmin public {
         allowedAddress = _to;
-        emit AllowedSet(_to);
+        AllowedSet(_to);
     }
 
     modifier onlyAdmin() { //A modifier to define admin-only functions
@@ -48,13 +46,8 @@ contract admined { //This token contract is administered
         _;
     }
 
-    modifier supplyLock() { //A modifier to lock mint and burn transactions
-        require(lockSupply == false);
-        _;
-    }
-
-    modifier transferLock() { //A modifier to lock transactions
-        require(lockTransfer == false || allowedAddress == msg.sender);
+    modifier crowdsaleonly() { //A modifier to lock transactions
+        require(allowedAddress == msg.sender);
         _;
     }
 
@@ -65,31 +58,12 @@ contract admined { //This token contract is administered
     function transferAdminship(address _newAdmin) onlyAdmin public { //Admin can be transfered
         require(_newAdmin != 0);
         admin = _newAdmin;
-        emit TransferAdminship(admin);
+        TransferAdminship(admin);
     }
 
-   /**
-    * @dev Function to set mint and burn locks
-    * @param _set boolean flag (true | false)
-    */
-    function setSupplyLock(bool _set) onlyAdmin public { //Only the admin can set a lock on supply
-        lockSupply = _set;
-        emit SetSupplyLock(_set);
-    }
-
-   /**
-    * @dev Function to set transfer lock
-    * @param _set boolean flag (true | false)
-    */
-    function setTransferLock(bool _set) onlyAdmin public { //Only the admin can set a lock on transfers
-        lockTransfer = _set;
-        emit SetTransferLock(_set);
-    }
 
     //All admin actions have a log for public review
     event AllowedSet(address _to);
-    event SetSupplyLock(bool _set);
-    event SetTransferLock(bool _set);
     event TransferAdminship(address newAdminister);
     event Admined(address administer);
 
@@ -124,7 +98,7 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
         require(frozen[msg.sender]==false);
         balances[msg.sender] = balances[msg.sender].sub(_value);
         balances[_to] = balances[_to].add(_value);
-        emit Transfer(msg.sender, _to, _value);
+        Transfer(msg.sender, _to, _value);
         return true;
     }
 
@@ -134,13 +108,13 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
     * @param _to The address to transfer to.
     * @param _value The amount to be transferred.
     */
-    function transferFrom(address _from, address _to, uint256 _value) transferLock public returns (bool success) {
+    function transferFrom(address _from, address _to, uint256 _value)  public returns (bool success) {
         require(_to != address(0)); //If you dont want that people destroy token
         require(frozen[_from]==false);
         allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
         balances[_from] = balances[_from].sub(_value);
         balances[_to] = balances[_to].add(_value);
-        emit Transfer(_from, _to, _value);
+        Transfer(_from, _to, _value);
         return true;
     }
 
@@ -152,7 +126,7 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
     function approve(address _spender, uint256 _value) public returns (bool success) {
         require((_value == 0) || (allowed[msg.sender][_spender] == 0)); //exploit mitigation
         allowed[msg.sender][_spender] = _value;
-        emit Approval(msg.sender, _spender, _value);
+        Approval(msg.sender, _spender, _value);
         return true;
     }
 
@@ -166,34 +140,11 @@ contract ERC20Token is ERC20TokenInterface, admined { //Standard definition of a
     }
 
     /**
-    * @dev Mint token to an specified address.
-    * @param _target The address of the receiver of the tokens.
-    * @param _mintedAmount amount to mint.
-    */
-    function mintToken(address _target, uint256 _mintedAmount) onlyAdmin supplyLock public {
-        balances[_target] = SafeMath.add(balances[_target], _mintedAmount);
-        totalSupply = SafeMath.add(totalSupply, _mintedAmount);
-        emit Transfer(0, this, _mintedAmount);
-        emit Transfer(this, _target, _mintedAmount);
-    }
-
-    /**
-    * @dev Frozen account.
-    * @param _target The address to being frozen.
-    * @param _flag The status of the frozen
-    */
-    function setFrozen(address _target,bool _flag) onlyAdmin public {
-        frozen[_target]=_flag;
-        emit FrozenStatus(_target,_flag);
-    }
-
-
-    /**
     * @dev Log Events
     */
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-    event FrozenStatus(address _target,bool _flag);
+
 }
 
 /**
@@ -208,19 +159,17 @@ contract EKK is ERC20Token {
     string public version = '1';
     uint256 public totalSupply = 2000000000 * 10**uint256(decimals);      //initial token creation
     uint256 public publicAllocation = 1000000000 * 10 ** uint(decimals);  // 50%  Token sales & Distribution
-    uint256 public GrowthReserve = 700000000 * 10 ** uint(decimals);      // 35%  Platform Growth Reserve
-    uint256 public MarketingPromotion= 100000000 * 10 ** uint(decimals);  // 5%   Markting/Promotion
-    uint256 public TeamAllocation = 160000000 *10 ** uint(decimals);      // 8%   Team
-    uint256 public Advisors = 40000000 * 10 ** uint(decimals);            // 2%   Advisors
-
+    uint256 public growthReserve = 700000000 * 10 ** uint(decimals);      // 35%  Platform Growth Reserve
+    uint256 public marketingAllocation= 100000000 * 10 ** uint(decimals);  // 5%   Markting/Promotion
+    uint256 public teamAllocation = 160000000 *10 ** uint(decimals);      // 8%   Team
+    uint256 public advisorsAllocation = 40000000 * 10 ** uint(decimals);            // 2%   Advisors
+    address public owner;
     function EKK() public {
 
         balances[this] = totalSupply;
-        setTransferLock(true);
-        setSupplyLock(true);
 
-        emit Transfer(0, this, totalSupply);
-        emit Transfer(this, msg.sender, balances[msg.sender]);
+        Transfer(0, this, totalSupply);
+        Transfer(this, msg.sender, balances[msg.sender]);
     }
 
     /**
@@ -233,13 +182,19 @@ contract EKK is ERC20Token {
     /**
     * @dev Get publicAllocation
     */
-    function GetPublicAllocation() public view returns (uint256 value) {
+    function getPublicAllocation() public view returns (uint256 value) {
         return publicAllocation;
+    }
+   /**
+    * @dev setOwner for EKKcrowdsale contract only
+    */
+    function setOwner(address _owner) onlyAdmin public {
+      owner = _owner;
     }
       /**
  *  transfer, only can be called by crowdsale contract
  */
-    function transferfromThis(address _to, uint256 _value) transferLock public returns (bool success) {
+    function transferFromPublicAllocation(address _to, uint256 _value) crowdsaleonly public returns (bool success) {
         // Prevent transfer to 0x0 address. Use burn() instead
         require(_to != 0x0);
         // Check if the sender has enough
@@ -253,51 +208,57 @@ contract EKK is ERC20Token {
         publicAllocation = publicAllocation.sub(_value);
         // Add the same to the recipient
         balances[_to] = balances[_to].add(_value);
-        emit Transfer(this, _to, _value);
+        Transfer(this, _to, _value);
         // Asserts are used to use static analysis to find bugs in your code. They should never fail
         assert(balances[this] + balances[_to] == previousBalances);
         return true;
     }
 
-    function sendGrowthReserve(address to, uint256 _value) onlyAdmin public  {
+    function growthReserveTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
-        require(to != 0x0 && GrowthReserve >= value);
+        require(to != 0x0 && growthReserve >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
-        GrowthReserve = GrowthReserve.sub(value);
-        emit Transfer(this, to, value);
+        growthReserve = growthReserve.sub(value);
+        Transfer(this, to, value);
     }
 
-    function sendMarketingPromotion(address to, uint256 _value) onlyAdmin public  {
+    function marketingAllocationTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
-        require(to != 0x0 && MarketingPromotion >= value);
+        require(to != 0x0 && marketingAllocation >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
-        MarketingPromotion = MarketingPromotion.sub(value);
-        emit Transfer(this, to, value);
+        marketingAllocation = marketingAllocation.sub(value);
+        Transfer(this, to, value);
     }
 
-    function sendTeamAllocation(address to, uint256 _value) onlyAdmin public  {
+    function teamAllocationTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
-        require(to != 0x0 && TeamAllocation >= value);
+        require(to != 0x0 && teamAllocation >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
-        TeamAllocation = TeamAllocation.sub(value);
-        emit Transfer(this, to, value);
+        teamAllocation = teamAllocation.sub(value);
+        Transfer(this, to, value);
     }
 
-    function sendAdvisors(address to, uint256 _value) onlyAdmin public  {
+    function advisorsAllocationTokenSend(address to, uint256 _value) onlyAdmin public  {
         uint256 value = _value * 10 ** uint(decimals);
-        require(to != 0x0 && Advisors >= value);
+        require(to != 0x0 && advisorsAllocation >= value);
         balances[this] = balances[this].sub(value);
         balances[to] = balances[to].add(value);
-        Advisors = Advisors.sub(value);
-        emit Transfer(this, to, value);
+        advisorsAllocation = advisorsAllocation.sub(value);
+        Transfer(this, to, value);
     }
 
     // unsold tokens back to Platform Growth Reserve
-    function TransferToGrowthReserve() transferLock public  {
-        GrowthReserve = GrowthReserve.add(publicAllocation);
+    function transferToGrowthReserve() crowdsaleonly public  {
+        growthReserve = growthReserve.add(publicAllocation);
         publicAllocation = 0;
     }
+    //refund tokens after crowdsale
+    function refundTokens(address _sender) crowdsaleonly public {
+        growthReserve = growthReserve.add(balances[_sender]);
+        //balances[_sender] = 0;
+    }
+    
 }

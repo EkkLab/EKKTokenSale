@@ -1,0 +1,22 @@
+#!/usr/bin/env bash 
+set -e
+
+export DAPP_NO_SAVE=1
+export ETH_GAS=4000000
+#export ETH_KEYSTORE=/home/aftnix/.dapp/testnet/8545/keystore/ 
+# export export ETH_KEYSTORE=/home/aftnix/.ethereum/keystore 
+export ETH_FROM=0xCfa36465598DCACBAa93e532A28df851ACe26470
+start_time=1528954800
+ico_period=7200
+token=$(set -x; dapp create EKK )
+
+sale=$(set -x; dapp create EKKcrowdsale $token)
+
+# (set -x; seth send "$token" "setOwner(address)" "$sale")
+(set -x; seth send "$sale" "setStarttime(uint256)" "$start_time") 
+(set -x; seth send "$token" "setAllowedAddress(address)" "$sale") 
+# (set -x; seth send "$sale" "setICOperiod(uint256)" "$ico_period")
+
+echo "token=$token"
+echo "sale=$sale"
+#set -x; seth call "$token" "totalSupply()"
