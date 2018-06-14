@@ -24,7 +24,7 @@ contract EKKcrowdsale is Ownable{
     // start time is the deploy time
     uint256 public startTime;
     //fixed for sale
-    uint public icoPeriod = 14 days;
+    uint public icoPeriod = 14 days ;
 
     // softcap
     uint256 softcap = 2000 ether;
@@ -90,13 +90,12 @@ contract EKKcrowdsale is Ownable{
     require(beneficiary != address(0));
     require(validPurchase());
     require(tokens <= token.getPublicAllocation());
-    require(tokenSold <= 400000000);
 
     token.transferFromPublicAllocation(beneficiary, tokens);
     weiRaised = weiRaised.add(msg.value);
     emit TokenPurchase(beneficiary, tokens);
     tokenSold = tokenSold.add(tokens);
-
+    require(tokenSold <= (400000000 * 1 ether));
     if(weiRaised >= softcap && !isSoftcapreached) {
         isSoftcapreached = true;
         vault.close();
