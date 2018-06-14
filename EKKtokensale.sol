@@ -89,7 +89,7 @@ contract EKKcrowdsale is Ownable{
     require(beneficiary != address(0));
     require(validPurchase());
     require(tokens <= token.GetPublicAllocation());
-    require(tokenSold < 400000000);
+    require(tokenSold <= 400000000);
 
     token.transferfromThis(beneficiary, tokens);
     weiRaised = weiRaised.add(msg.value);
