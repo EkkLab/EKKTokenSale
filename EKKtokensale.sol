@@ -39,6 +39,7 @@ contract EKKcrowdsale is Ownable{
 
     // amount of raised money in wei
     uint256 public weiRaised;
+    uint256 public tokenSold = 0;
     bool public isFinalized = false;
     bool issoftcapreached = false;
 
@@ -88,9 +89,11 @@ contract EKKcrowdsale is Ownable{
     require(beneficiary != address(0));
     require(validPurchase());
     require(tokens <= token.GetPublicAllocation());
+    require(tokenSold < 400000000);
 
     token.transferfromThis(beneficiary, tokens);
     weiRaised = weiRaised.add(msg.value);
+    tokenSold = tokenSold.add(tokens);
     emit TokenPurchase(beneficiary, tokens);
 
     if(weiRaised >= softcap && !issoftcapreached) {
