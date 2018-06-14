@@ -22,9 +22,9 @@ contract EKKcrowdsale is Ownable{
     using SafeMath for uint256;
 
     // start time is the deploy time
-    uint256 public startTime = now;
+    uint256 public startTime;
     //fixed for sale
-    uint public icoPeriod = 14 days; 
+    uint public icoPeriod = 14 days;
 
     // softcap
     uint256 softcap = 2000 ether;
@@ -61,9 +61,9 @@ contract EKKcrowdsale is Ownable{
     }
   //set ICOstarttime
 
-  // function setStarttime (uint256 _starttime) onlyOwner public  {
-  //     startTime = _starttime;
-  // }
+   function setStarttime (uint256 _starttime) onlyOwner public  {
+       startTime = _starttime;
+   }
 
   //set ICOendtime
 
@@ -89,12 +89,8 @@ contract EKKcrowdsale is Ownable{
 
     require(beneficiary != address(0));
     require(validPurchase());
-<<<<<<< HEAD
     require(tokens <= token.GetPublicAllocation());
     require(tokenSold <= 400000000);
-=======
-    require(tokens <= token.getPublicAllocation());
->>>>>>> master
 
     token.transferFromPublicAllocation(beneficiary, tokens);
     weiRaised = weiRaised.add(msg.value);
@@ -130,7 +126,7 @@ contract EKKcrowdsale is Ownable{
     emit Finalized();
     isFinalized = true;
   }
-  
+
 
   // if crowdsale is unsuccessful, investors can claim refunds here
   function claimRefund() public {
