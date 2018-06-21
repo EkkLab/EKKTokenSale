@@ -163,7 +163,7 @@ contract EKK is ERC20Token {
     uint256 public marketingAllocation= 100000000 * 10 ** uint(decimals);  // 5%   Markting/Promotion
     uint256 public teamAllocation = 160000000 *10 ** uint(decimals);      // 8%   Team
     uint256 public advisorsAllocation = 40000000 * 10 ** uint(decimals);            // 2%   Advisors
-    address public owner;
+    //address public owner;
     function EKK() public {
 
         balances[this] = totalSupply;
@@ -188,9 +188,9 @@ contract EKK is ERC20Token {
    /**
     * @dev setOwner for EKKcrowdsale contract only
     */
-    function setOwner(address _owner) onlyAdmin public {
-      owner = _owner;
-    }
+    // function setOwner(address _owner) onlyAdmin public {
+    //   owner = _owner;
+    // }
       /**
  *  transfer, only can be called by crowdsale contract
  */

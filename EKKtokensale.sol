@@ -54,14 +54,14 @@ contract EKKcrowdsale is Ownable{
     * @notice EKKcrowdsale constructor
     * @param _tokenaddress is the token totalDistributed
     */
-    function EKKcrowdsale (address _tokenaddress) public {
-        wallet = msg.sender;
+  function EKKcrowdsale (address _tokenaddress, address _walletaddress) public {
+        wallet =_walletaddress;
         token = EKK(_tokenaddress);
-        vault = new RefundVault(wallet);
+        vault = new RefundVault(_walletaddress);
     }
   //set ICOstarttime
 
-   function setStarttime (uint256 _starttime) onlyOwner public  {
+   function setStartTime (uint256 _starttime) onlyOwner public  {
        startTime = _starttime;
    }
 
@@ -72,9 +72,9 @@ contract EKKcrowdsale is Ownable{
   // }
 
   //set wallet address
-  function setWalletAddress (address _wallet) onlyOwner public {
-      wallet = _wallet;
-  }
+  // function setWalletAddress (address _wallet) onlyOwner public {
+  //     wallet = _wallet;
+  // }
 
   // fallback function can be used to buy tokens
   function () external payable {
@@ -107,7 +107,20 @@ contract EKKcrowdsale is Ownable{
         forwardFunds();
     }
   }
-
+  function sendTokenFromPublicAllocation(address _beneficiary, uint256 _tokens, uint256 _weiAmount) onlyOwner public {
+    require(_beneficiary != address(0));
+    //require(now >= startTime && now <= startTime + icoPeriod);
+    require(_tokens <= token.getPublicAllocation());
+    token.transferFromPublicAllocation(_beneficiary, _tokens);
+    weiRaised = weiRaised.add(_weiAmount);
+    emit TokenPurchase(_beneficiary, _tokens);
+    tokenSold = tokenSold.add(_tokens);
+    require(tokenSold <= (400000000 * 1 ether));
+    if(weiRaised >= softcap && !isSoftcapreached) {
+        isSoftcapreached = true;
+        vault.close();
+    }
+  }
 
   /**
    * @dev Must be called after crowdsale ends, to do some extra finalization
@@ -151,11 +164,11 @@ contract EKKcrowdsale is Ownable{
 
     uint256 tokenBought = weiAmount.mul(price);
     if(weiAmount >= 200 ether) {
-      if (now < startTime + 2 days ) {
+      if (now < startTime + 1 days ) {
         tokenBought = tokenBought.mul(120);
         tokenBought = tokenBought.div(100); //+20%
       }
-      else if ( (now > startTime + 2 days) && (now < startTime + 7 days)) {
+      else if ( (now > startTime + 1 days) && (now < startTime + 7 days)) {
         tokenBought = tokenBought.mul(115);
         tokenBought = tokenBought.div(100); //+15%
       }
@@ -164,11 +177,11 @@ contract EKKcrowdsale is Ownable{
         tokenBought = tokenBought.div(100); //+10%
       }
     } else {
-      if (now < startTime + 2 days ) {
+      if (now < startTime + 1 days ) {
         tokenBought = tokenBought.mul(115);
         tokenBought = tokenBought.div(100); //+15%
       }
-      else if ( (now > startTime + 2 days) && (now < startTime + 7 days)) {
+      else if ( (now > startTime + 1 days) && (now < startTime + 7 days)) {
         tokenBought = tokenBought.mul(110);
         tokenBought = tokenBought.div(100); //+10%
       }
